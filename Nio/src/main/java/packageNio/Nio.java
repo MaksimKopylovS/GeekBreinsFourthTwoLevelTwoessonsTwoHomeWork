@@ -16,6 +16,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.FileAttribute;
+import java.util.List;
 import java.util.Set;
 
 public class Nio {
@@ -117,8 +118,8 @@ public class Nio {
         }
 //  mkdir (name) создать директорию
         if (masCommand[0].equals("mkdir")) {
-
-            new File("./" + rootPath + "/" + masCommand[1]).mkdirs();
+            Path path = Paths.get("./" + rootPath + "/" + masCommand[1]);
+            Path newDir = Files.createDirectory(path);
         }
 //  cd (name) - перейти в папку
         if (masCommand[0].equals("cd")) {
@@ -126,28 +127,23 @@ public class Nio {
         }
 //  rm (name) удалить файл по имени
         if (masCommand[0].equals("rm")) {
-            File file = new File("./" + rootPath + "/" + masCommand[1]);
-            if (file.delete()) {
-                channel.write(ByteBuffer.wrap("Файл удалён ".getBytes()));
-            } else {
-                channel.write(ByteBuffer.wrap("Файла не существует ".getBytes()));
-            }
+            Files.delete(Paths.get("./" + rootPath + "/" + masCommand[1]));
+            
         }
         //  copy (src, target) скопировать файл из одного пути в другой
         if (masCommand[0].equals("copy")) {
-            File sours = new File(masCommand[1]);
-            File destination = new File(masCommand[2]);
-            Files.copy(sours.toPath(), destination.toPath());
+            Files.copy(Paths.get(masCommand[1]), Paths.get(masCommand[2]));
 
         }
         //  cat (name) - вывести в консоль содержимое файла
         if (masCommand[0].equals("cat")) {
-            File file = new File("./" + rootPath + "/" + masCommand[1]);
-            BufferedReader buff = new BufferedReader(new FileReader(file));
-            String text;
-            while ((text = buff.readLine()) != null)
-                System.out.println(text);
-        }
+            List<String> list = Files.readAllLines(Paths.get("./" + rootPath + "/" + masCommand[1]));
+            for (String str: list) {
+                channel.write(ByteBuffer.wrap(str.getBytes()));
+                channel.write(ByteBuffer.wrap("\n".getBytes()));
+            }
+
+            }
 
     }
 
